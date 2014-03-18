@@ -1,6 +1,6 @@
 {
   "name": "es6-module-loader",
-  "version": "0.4.3",
+  "version": "0.5.1",
   "description": "An ES6 Module Loader polyfill based on the latest spec.",
   "homepage": "https://github.com/ModuleLoader/es6-module-loader",
   "main": "dist/es6-module-loader.js",
@@ -26,13 +26,13 @@
       "type": "MIT"
     }
   ],
-  "_release": "0.4.3",
+  "_release": "0.5.1",
   "_resolution": {
     "type": "version",
-    "tag": "v0.4.3",
-    "commit": "52b67e3afa5a26568ac2e9d15c8d742bdd50c78c"
+    "tag": "v0.5.1",
+    "commit": "42354d106f6132053a1b5a634fbb400bdfea71f9"
   },
   "_source": "git://github.com/ModuleLoader/es6-module-loader.git",
-  "_target": "~0.4.2",
+  "_target": "~0.5.1",
   "_originalSource": "es6-module-loader"
 }
