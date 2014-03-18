@@ -1,6 +1,6 @@
 /*jshint esnext:true */
 
-// Traceur TodoMVC
+// di.js TodoMVC
 // ---------------
 // This is a re-write of the Backbone [TodoMVC](http://todomvc.com) app using
 // ECMAScript 6 features and the Angular 2.0 dependency injection framework.
@@ -43,7 +43,8 @@ module templateModule from './templates';
 // we talked about above.
 $(() => {
   // We create a di.js Injector which will hold all of our managed application
-  // components.
+  // components. It gets a reference to the template module, and will register
+  // all the exported variables from it.
   var injector = new Injector([templateModule]);
   // *Finally, we kick things off by creating the **App**.*
   // We use the injector to instantiate an `AppView` and a `Filters` instance.

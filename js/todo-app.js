@@ -173,7 +173,11 @@ class TodoFilter {
 
 // Todo Item View factory class
 // ----------------------------
-//
+
+// This class is annotated with the Inject annotation with two tokens: The
+// TodoFilter class and the 'itemTemplate' string. The injector will look up
+// the corresponding dependencies when `TodoViewFactory` is instantiated and
+// hand them to the constructor. 
 @Inject(TodoFilter, 'itemTemplate')
 class TodoViewFactory {
 
@@ -301,7 +305,8 @@ class TodoView extends View {
 // ---------------------
 
 // *Our overall **AppView** is the top-level piece of UI.*
-// It gets the instance of TodoList as an injected constructor.
+// It gets different application components as constructor arguments,
+// injected by the DI injector.
 @Inject(TodoList, TodoFilter, TodoViewFactory, 'statsTemplate')
 export class AppView extends View {
 
