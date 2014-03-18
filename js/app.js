@@ -3,10 +3,11 @@
 // Traceur TodoMVC
 // ---------------
 // This is a re-write of the Backbone [TodoMVC](http://todomvc.com) app using
-// ECMAScript 6 features. It's made possible using
-// [Traceur](https://github.com/google/traceur-compiler) compiler and was
-// authored by Addy Osmani, Pascal Hartig, Sindre Sorhus, Stephen Sawchuk,
-// Rick Waldron, Domenic Denicola and Guy Bedford.
+// ECMAScript 6 features and the Angular 2.0 dependency injection framework.
+// It's made possible using [Traceur](https://github.com/google/traceur-compiler) compiler
+// and was authored by Addy Osmani, Pascal Hartig, Sindre Sorhus, Stephen Sawchuk,
+// Rick Waldron, Domenic Denicola and Guy Bedford. Dependency injection features
+// added by Tero Parviainen.
 
 // You can [run](http://addyosmani.github.io/todomvc-backbone-es6/) the completed app,
 // [watch](https://github.com/addyosmani/todomvc-backbone-es6) the project repository
@@ -16,8 +17,13 @@
 // -----------------------------
 
 // #### Imports
-// We import the classes we defined in the TodoApp module using the `import`
-// keyword.
+
+
+// We first import the di.js Injector, which we can use to launch the application.
+// We can do this with the `import` keyword.
+import {Injector} from './di/injector';
+
+// We then import the classes we defined in the TodoApp module.
 import {AppView, Filters} from './todo-app';
 
 // Document ready
