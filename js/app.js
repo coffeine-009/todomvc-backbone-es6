@@ -9,8 +9,8 @@
 // Rick Waldron, Domenic Denicola and Guy Bedford. Dependency injection features
 // added by Tero Parviainen.
 
-// You can [run](http://addyosmani.github.io/todomvc-backbone-es6/) the completed app,
-// [watch](https://github.com/addyosmani/todomvc-backbone-es6) the project repository
+// You can [run](http://teropa.github.io/todomvc-backbone-es6/) the completed app,
+// [watch](https://github.com/teropa/todomvc-backbone-es6) the project repository
 // or look at the original [ES5 implementation](http://goo.gl/8opExB).
 
 // Begin your ES6 adventure here
@@ -39,9 +39,14 @@ import {AppView, Filters} from './todo-app';
 // expression, it has the same properties as the expression-form arrow functions
 // we talked about above.
 $(() => {
+  // We create a di.js Injector which will hold all of our managed application
+  // components.
+  var injector = new Injector();
   // *Finally, we kick things off by creating the **App**.*
-  new AppView();
-  new Filters();
+  // We use the injector to instantiate an `AppView` and a `Filters` instance.
+  // We then kick off the Backbone router.
+  injector.get(AppView);
+  injector.get(Filters);
   Backbone.history.start();
 });
 
