@@ -10,6 +10,10 @@
 // It's possible to rename exported values, define modules that are inline
 // and even declare defaults for import/export.
 
+// In order to annotate our classes, we need to import some annotations from the
+// DI framework.
+import {Inject} from './di/annotations';
+
 // #### Destructuring Assignments
 // Constant (`const`) definitions are block scoped, but their values are read-only.
 // This means they cannot be re-declared later on. Backbone's core component
@@ -27,7 +31,7 @@ var { Model, View, Collection, Router, LocalStorage } = Backbone;
 
 
 var ENTER_KEY = 13; // const
-var TodoFilter = ''; // let
+
 
 // Todo Model class
 // ----------------
@@ -155,8 +159,33 @@ class TodoList extends Collection {
   }
 }
 
-// *Create our global collection of **Todos**.*
-var Todos = new TodoList(); // let
+
+// Todo Filter class
+// -----------------
+
+// The todo filter holds the current value of the filter
+// (active, completed, or none).
+class TodoFilter {
+  constructor() {
+    this.value = '';
+  }
+}
+
+// Todo Item View factory class
+// ----------------------------
+//
+@Inject(TodoFilter, 'itemTemplate')
+class TodoViewFactory {
+
+  constructor(filter, itemTemplate) {
+    this.filter = filter;
+    this.itemTemplate = itemTemplate;
+  }
+
+  create(options) {
+    return new TodoView(this.filter, this.itemTemplate, options);
+  }
+}
 
 // Todo Item View class
 // --------------------
@@ -164,7 +193,9 @@ var Todos = new TodoList(); // let
 // *The DOM element for a todo item...*
 class TodoView extends View {
 
-  constructor(options) {
+  constructor(filter, itemTemplate, options) {
+    this.filter = filter;
+
     // *... is a list tag.*
     this.tagName = 'li';
 
@@ -174,7 +205,7 @@ class TodoView extends View {
     this.model = Todo;
 
     // *Cache the template function for a single item.*
-    this.template = _.template($('#item-template').html());
+    this.template = itemTemplate;
 
     this.input = '';
 
@@ -222,8 +253,8 @@ class TodoView extends View {
   get isHidden() {
     var isCompleted = this.model.get('completed'); // const
     return (// hidden cases only
-      (!isCompleted && TodoFilter === 'completed') ||
-      (isCompleted && TodoFilter === 'active')
+      (!isCompleted && this.filter.value === 'completed') ||
+      (isCompleted && this.filter.value === 'active')
     );
   }
 
@@ -270,15 +301,20 @@ class TodoView extends View {
 // ---------------------
 
 // *Our overall **AppView** is the top-level piece of UI.*
+// It gets the instance of TodoList as an injected constructor.
+@Inject(TodoList, TodoFilter, TodoViewFactory, 'statsTemplate')
 export class AppView extends View {
 
-  constructor() {
+  constructor(todos, filter, todoViewFactory, statsTemplate) {
+    this.todos = todos;
+    this.filter = filter;
+    this.todoViewFactory = todoViewFactory;
 
     // *Instead of generating a new element, bind to the existing skeleton of
     // the App already present in the HTML.*
     this.setElement($('#todoapp'), true);
 
-    this.statsTemplate = _.template($('#stats-template').html()),
+    this.statsTemplate = statsTemplate;
 
     // *Delegate events for creating new items and clearing completed ones.*
     this.events = {
@@ -287,7 +323,7 @@ export class AppView extends View {
       'click #toggle-all': 'toggleAllComplete'
     };
 
-    // *At initialization, we bind to the relevant events on the `Todos`
+    // *At initialization, we bind to the relevant events on the `this.todos`
     // collection, when items are added or changed. Kick things off by
     // loading any preexisting todos that might be saved in localStorage.*
     this.allCheckbox = this.$('#toggle-all')[0];
@@ -295,13 +331,13 @@ export class AppView extends View {
     this.$footer = this.$('#footer');
     this.$main = this.$('#main');
 
-    this.listenTo(Todos, 'add', this.addOne);
-    this.listenTo(Todos, 'reset', this.addAll);
-    this.listenTo(Todos, 'change:completed', this.filterOne);
-    this.listenTo(Todos, 'filter', this.filterAll);
-    this.listenTo(Todos, 'all', this.render);
+    this.listenTo(this.todos, 'add', this.addOne);
+    this.listenTo(this.todos, 'reset', this.addAll);
+    this.listenTo(this.todos, 'change:completed', this.filterOne);
+    this.listenTo(this.todos, 'filter', this.filterAll);
+    this.listenTo(this.todos, 'all', this.render);
 
-    Todos.fetch();
+    this.todos.fetch();
 
     super();
   }
@@ -309,10 +345,10 @@ export class AppView extends View {
   // *Re-rendering the App just means refreshing the statistics— the rest of
   // the app doesn't change.*
   render() {
-    var completed = Todos.completed().length; // const
-    var remaining = Todos.remaining().length; // const
+    var completed = this.todos.completed().length; // const
+    var remaining = this.todos.remaining().length; // const
 
-    if (Todos.length) {
+    if (this.todos.length) {
       this.$main.show();
       this.$footer.show();
 
@@ -324,7 +360,7 @@ export class AppView extends View {
 
       this.$('#filters li a')
         .removeClass('selected')
-        .filter('[href="#/' + (TodoFilter || '') + '"]')
+        .filter('[href="#/' + (this.filter.value || '') + '"]')
         .addClass('selected');
     } else {
       this.$main.hide();
@@ -337,14 +373,14 @@ export class AppView extends View {
   // *Add a single todo item to the list by creating a view for it, then
   // appending its element to the `<ul>`.*
   addOne(model) {
-    var view = new TodoView({ model }); // const
+    var view = this.todoViewFactory.create({ model }); // const
     $('#todo-list').append(view.render().el);
   }
 
-  // *Add all items in the **Todos** collection at once.*
+  // *Add all items in the **this.todos** collection at once.*
   addAll() {
     this.$('#todo-list').html('');
-    Todos.each(this.addOne, this);
+    this.todos.each(this.addOne, this);
   }
 
   filterOne(todo) {
@@ -352,14 +388,14 @@ export class AppView extends View {
   }
 
   filterAll() {
-    Todos.each(this.filterOne, this);
+    this.todos.each(this.filterOne, this);
   }
 
   // *Generate the attributes for a new Todo item.*
   newAttributes() {
     return {
       title: this.$input.val().trim(),
-      order: Todos.nextOrder(),
+      order: this.todos.nextOrder(),
       completed: false
     };
   }
@@ -371,28 +407,30 @@ export class AppView extends View {
       return;
     }
 
-    Todos.create(this.newAttributes());
+    this.todos.create(this.newAttributes());
     this.$input.val('');
   }
 
   // *Clear all completed todo items and destroy their models.*
   clearCompleted() {
-    _.invoke(Todos.completed(), 'destroy');
+    _.invoke(this.todos.completed(), 'destroy');
     return false;
   }
 
   toggleAllComplete() {
     var completed = this.allCheckbox.checked; // const
-    Todos.each(todo => todo.save({ completed }));
+    this.todos.each(todo => todo.save({ completed }));
   }
 }
 
 // The Filters Router class
 // ------------------------
-
+@Inject(TodoList, TodoFilter)
 export class Filters extends Router {
 
-  constructor() {
+  constructor(todos, todoFilter) {
+    this.todos = todos;
+    this.todoFilter = todoFilter;
     this.routes = {
       '*filter': 'filter'
     }
@@ -427,12 +465,10 @@ export class Filters extends Router {
   //     }
   filter(param = '') {
     // *Set the current filter to be used.*
-    TodoFilter = param;
+    this.todoFilter.value = param;
 
     // *Trigger a collection filter event, causing hiding/unhiding
     // of Todo view items.*
-    Todos.trigger('filter');
+    this.todos.trigger('filter');
   }
 }
-
-

@@ -24,7 +24,10 @@
 import {Injector} from './di/injector';
 
 // We then import the classes we defined in the TodoApp module.
-import {AppView, Filters} from './todo-app';
+import {AppView, Filters, createItemTemplate} from './todo-app';
+
+// We also import the whole templates module to a local variable.
+module templateModule from './templates';
 
 // Document ready
 // --------------
@@ -41,7 +44,7 @@ import {AppView, Filters} from './todo-app';
 $(() => {
   // We create a di.js Injector which will hold all of our managed application
   // components.
-  var injector = new Injector();
+  var injector = new Injector([templateModule]);
   // *Finally, we kick things off by creating the **App**.*
   // We use the injector to instantiate an `AppView` and a `Filters` instance.
   // We then kick off the Backbone router.
