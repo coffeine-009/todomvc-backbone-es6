@@ -12,7 +12,7 @@
 
 // In order to annotate our classes, we need to import some annotations from the
 // DI framework.
-import {Inject} from './di/annotations';
+import {Inject} from 'di';
 
 // #### Destructuring Assignments
 // Constant (`const`) definitions are block scoped, but their values are read-only.

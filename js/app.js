@@ -21,7 +21,7 @@
 
 // We first import the di.js Injector, which we can use to launch the application.
 // We can do this with the `import` keyword.
-import {Injector} from './di/injector';
+import {Injector} from 'di';
 
 // We then import the classes we defined in the TodoApp module.
 import {AppView, Filters, createItemTemplate} from './todo-app';

@@ -53,12 +53,13 @@
 		<script src="bower_components/lodash/dist/lodash.js"></script>
 		<script src="bower_components/backbone/backbone.js"></script>
 		<script src="bower_components/backbone.localStorage/backbone.localStorage.js"></script>
-		<script src="q.js"></script>
 		<script src="bower_components/es6-shim/es6-shim.js"></script>
 		<script src="bower_components/es6-module-loader/dist/traceur.js"></script>
 		<script src="bower_components/es6-module-loader/dist/es6-module-loader.js"></script>
+		<script src="bower_components/systemjs/dist/system.js"></script>
 		<script>
 			traceur.options.experimental = true;
+			System.map['di'] = 'bower_components/di/src/index';
 			System.import('js/app').catch(function(e) {
 				console.error(e);
 			});
