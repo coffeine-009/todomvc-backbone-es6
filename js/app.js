@@ -24,7 +24,7 @@
 import {Injector} from 'di';
 
 // We then import the classes we defined in the TodoApp module.
-import {AppView, Filters, createItemTemplate} from './todo-app';
+import {AppView, Filters} from './todo-app';
 
 // We also import the whole templates module to a local variable.
 module templateModule from './templates';
