@@ -6,7 +6,7 @@
 // Other parts of the application can then just have template injected.
 
 // We need the `Provide` annotation from the DI framework
-import {Provide} from './di/annotations';
+import {Provide} from 'di';
 
 // The token of this dependency is the string `'itemTemplate'`.
 @Provide('itemTemplate')

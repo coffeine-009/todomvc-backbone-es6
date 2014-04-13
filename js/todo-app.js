@@ -12,7 +12,7 @@
 
 // In order to annotate our classes, we need to import some annotations from the
 // DI framework.
-import {Inject} from './di/annotations';
+import {Inject, InjectLazy} from 'di';
 
 // #### Destructuring Assignments
 // Constant (`const`) definitions are block scoped, but their values are read-only.
@@ -171,30 +171,12 @@ class TodoFilter {
   }
 }
 
-// Todo Item View factory class
-// ----------------------------
-
-// This class is annotated with the Inject annotation with two tokens: The
-// TodoFilter class and the 'itemTemplate' string. The injector will look up
-// the corresponding dependencies when `TodoViewFactory` is instantiated and
-// hand them to the constructor. 
-@Inject(TodoFilter, 'itemTemplate')
-class TodoViewFactory {
-
-  constructor(filter, itemTemplate) {
-    this.filter = filter;
-    this.itemTemplate = itemTemplate;
-  }
-
-  create(options) {
-    return new TodoView(this.filter, this.itemTemplate, options);
-  }
-}
 
 // Todo Item View class
 // --------------------
 
 // *The DOM element for a todo item...*
+@Inject(TodoFilter, 'itemTemplate', 'options')
 class TodoView extends View {
 
   constructor(filter, itemTemplate, options) {
@@ -307,13 +289,16 @@ class TodoView extends View {
 // *Our overall **AppView** is the top-level piece of UI.*
 // It gets different application components as constructor arguments,
 // injected by the DI injector.
-@Inject(TodoList, TodoFilter, TodoViewFactory, 'statsTemplate')
 export class AppView extends View {
+  constructor(
+      @Inject(TodoList) todos,
+      @Inject(TodoFilter) filter,
+      @InjectLazy(TodoView) createTodoView,
+      @Inject('statsTemplate') statsTemplate) {
 
-  constructor(todos, filter, todoViewFactory, statsTemplate) {
     this.todos = todos;
     this.filter = filter;
-    this.todoViewFactory = todoViewFactory;
+    this.createTodoView = createTodoView;
 
     // *Instead of generating a new element, bind to the existing skeleton of
     // the App already present in the HTML.*
@@ -378,7 +363,7 @@ export class AppView extends View {
   // *Add a single todo item to the list by creating a view for it, then
   // appending its element to the `<ul>`.*
   addOne(model) {
-    var view = this.todoViewFactory.create({ model }); // const
+    var view = this.createTodoView('options', { model }); // const
     $('#todo-list').append(view.render().el);
   }
 
